@@ -16,11 +16,18 @@ class unique_file
 
 public:
     FILE *get() const { return fp; }
-    
+    void reset() { if (fp) fclose(fp); fp = nullptr; }
+	
     operator bool() const { return fp != nullptr; }
     
     unique_file &operator=(const unique_file&) = delete;
-    unique_file &operator=(unique_file &&u) { fp = std::move(u.fp); u.fp = nullptr; return *this; }
+	
+    unique_file &operator=(unique_file &&u)
+	{
+		if (std::addressof(u) == this) return *this;
+		reset();
+		fp = std::move(u.fp); u.fp = nullptr; return *this;
+	}
     
     unique_file() : fp(nullptr) {}
     unique_file(FILE *p) : fp(p) {}
